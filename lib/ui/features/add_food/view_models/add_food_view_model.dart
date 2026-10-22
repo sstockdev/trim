@@ -44,6 +44,7 @@ class AddFoodViewModel extends ViewModel {
   bool searching = false;
   String? error;
   Timer? _debounce;
+  int _started = 0;
 
   /// The plugin's search hint, or USDA's.
   String get hint => _search?.hint ?? 'Search USDA foods';
@@ -63,8 +64,9 @@ class AddFoodViewModel extends ViewModel {
 
   /// Runs the search for the current text. With the shared USDA key the view calls this on submit.
   Future<void> search() async {
-    final q = _query;
+    final q = _query, run = ++_started;
     if (q.length < 2) {
+      searching = false;
       groups = const [];
       usda = const [];
       error = null;
@@ -87,8 +89,11 @@ class AddFoodViewModel extends ViewModel {
     } on Exception catch (e) {
       if (q == _query) error = '$e';
     } finally {
-      searching = false;
-      notifyListeners();
+      // A newer search may still be running; it turns the spinner off itself.
+      if (run == _started) {
+        searching = false;
+        notifyListeners();
+      }
     }
   }
 

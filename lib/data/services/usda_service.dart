@@ -27,13 +27,14 @@ class FoodError implements Exception {
 /// USDA FoodData Central, the app's own food search. Plugins can add other sources. Stateless apart from the
 /// injected HTTP client and keys.
 class UsdaService {
-  UsdaService({required this.client, required this._keys});
+  UsdaService({required this.client, required this._keys, this.retryDelay = const Duration(milliseconds: 250)});
 
   static const timeout = Duration(seconds: 15);
   static const signup = 'https://api.data.gov/signup/';
 
   final http.Client client;
   final KeyService _keys;
+  final Duration retryDelay;
 
   /// USDA's shared demo key works but is rate-limited; a free personal key from api.data.gov lifts the limit.
   String get key => _keys.get(KeyService.usda) ?? 'DEMO_KEY';
@@ -42,6 +43,20 @@ class UsdaService {
   /// Without a personal key, USDA's shared key allows only a few dozen searches an hour, so search on submit.
   bool get liveSearch => hasKey;
 
+  /// USDA's servers answer a share of valid requests with a bare nginx 400 page (about 40 % in October 2026), so
+  /// that and a 5xx are retried a few times before they count. A 400 from the API itself is JSON and isn't retried.
+  static const attempts = 4;
+
+  Future<http.Response> _get(Uri uri) async {
+    for (var attempt = 1; ; attempt++) {
+      final resp = await send(client.get(uri));
+      final code = resp.statusCode;
+      final stray = code >= 500 || (code == 400 && !resp.body.trimLeft().startsWith('{'));
+      if (attempt == attempts || !stray) return resp;
+      await Future<void>.delayed(retryDelay * attempt);
+    }
+  }
+
   /// Tries [key] with a one-result search. Throws a [FoodError] when USDA refuses it.
   Future<void> check(String key) async {
     final uri = Uri.https('api.nal.usda.gov', '/fdc/v1/foods/search', {
@@ -49,7 +64,7 @@ class UsdaService {
       'query': 'apple',
       'pageSize': '1',
     });
-    final resp = await send(client.get(uri));
+    final resp = await _get(uri);
     if (resp.statusCode == 401 || resp.statusCode == 403) throw FoodError.rejectedKey;
     jsonOf(resp);
   }
@@ -62,7 +77,7 @@ class UsdaService {
       'pageSize': '30',
       'dataType': 'Foundation,SR Legacy,Survey (FNDDS),Branded',
     });
-    final r = jsonOf(await send(client.get(uri)));
+    final r = jsonOf(await _get(uri));
     return listOf(r['foods']).map(_usdaItem).whereType<FoodItem>().toList();
   }
 
@@ -76,7 +91,7 @@ class UsdaService {
       'pageSize': '10',
       'dataType': 'Branded',
     });
-    final r = jsonOf(await send(client.get(uri)));
+    final r = jsonOf(await _get(uri));
     String bare(Object? v) => (v?.toString() ?? '').replaceFirst(RegExp('^0+'), '');
     for (final f in listOf(r['foods'])) {
       if (bare(f['gtinUpc']) != bare(digits)) continue;
