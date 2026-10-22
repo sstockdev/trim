@@ -1,0 +1,109 @@
+name: Build
+
+# Every push to main builds Trim.apk and Trim.ipa as workflow artifacts. Pushing a tag like v1.2.0 also
+# publishes both files as a GitHub Release.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FLUTTER_VERSION: '3.47.7'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart format --set-exit-if-changed lib test
+      - run: flutter analyze
+      - run: flutter test
+
+  android:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      # With the ANDROID_KEYSTORE_* secrets set, the APK is signed with that keystore, so each build installs over
+      # the last. Without them it's signed with the runner's debug key (see android/app/build.gradle.kts).
+      - name: Release keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then echo "No keystore secrets; using the debug key."; exit 0; fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/release.jks
+          printf 'storeFile=release.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+            "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEYSTORE_PASSWORD" > android/key.properties
+      - run: flutter build apk --release --build-number ${{ github.run_number }}
+      - run: cp build/app/outputs/flutter-apk/app-release.apk Trim.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Trim.apk
+          path: Trim.apk
+
+  ios:
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter build ios --release --no-codesign --build-number ${{ github.run_number }}
+      # xtool re-signs the app with your Apple ID when it installs it, and it reads the capabilities to request
+      # (HealthKit) from the entitlements embedded in the executable. An unsigned build has none, so sign it
+      # ad hoc with Runner.entitlements first, frameworks before the app.
+      - name: Package Trim.ipa
+        run: |
+          app=build/ios/iphoneos/Runner.app
+          find "$app/Frameworks" -maxdepth 1 \( -name '*.framework' -o -name '*.dylib' \) -print0 |
+            xargs -0 -I{} codesign --force --sign - --timestamp=none {}
+          codesign --force --sign - --timestamp=none --entitlements ios/Runner/Runner.entitlements "$app"
+          codesign -d --entitlements - "$app"
+          mkdir -p Payload
+          cp -R "$app" Payload/
+          zip -qry Trim.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Trim.ipa
+          path: Trim.ipa
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [android, ios]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Trim.apk
+            Trim.ipa

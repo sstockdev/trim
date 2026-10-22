@@ -1,0 +1,45 @@
+# Flutter, Dart and pub
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+app.*.symbols
+app.*.map.json
+migrate_working_dir/
+.widget_preview/
+
+# Android Studio and IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Misc
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+.netrc
+.claude/
+
+# Built apps downloaded from CI
+*.apk
+*.ipa
+
+# Local notes and tool caches
+CLAUDE.md
+.serena/
