@@ -1,7 +1,7 @@
 name: trim
 description: "Personal food log and weight-loss coach."
 publish_to: 'none'
-version: 1.1.2+7
+version: 1.2.0+8
 
 environment:
   sdk: ^3.13.5
