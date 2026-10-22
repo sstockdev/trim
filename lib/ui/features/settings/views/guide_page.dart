@@ -86,8 +86,11 @@ class GuidePage extends StatelessWidget {
           _topic(
             context,
             'Safety',
-            "The app won't set a deficit if you're under 18, pregnant or breastfeeding, or already underweight, and it flags losing more than 1.5 % a week or eating under the minimum. With diabetes medicines that can cause lows, a history of eating disorders, kidney disease or a GLP-1 medicine, involve your doctor. On a GLP-1, up to about 40 % of weight lost can be lean mass, so protein and lifting matter even more.",
-            ['Jensen et al., AHA/ACC/TOS obesity guideline, 2013', 'Wilding et al., NEJM 2021 (STEP 1)'],
+            "The app won't set a deficit if you're under 18, pregnant or breastfeeding, or already underweight, and it flags losing more than 1.5 % a week or eating under the minimum. With diabetes medicines that can cause lows, a history of eating disorders, kidney disease or a GLP-1 medicine, involve your doctor. In a large trial of a GLP-1 medicine, more than a third of the weight lost was lean mass, so protein and lifting matter even more.",
+            [
+              'Jensen et al., AHA/ACC/TOS obesity guideline, 2013',
+              'Wilding et al., NEJM 2021 and J Endocr Soc 2021 (STEP 1)',
+            ],
           ),
         ],
       ),

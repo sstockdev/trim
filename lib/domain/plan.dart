@@ -371,8 +371,8 @@ class Plan {
     }
 
     // Protein: 1.6 g per kg of goal weight. That's the point where extra protein stops adding muscle in
-    // resistance training (Morton 2018), and it lands in the 1.2 to 1.6 g/kg of current weight that obesity
-    // guidelines give for keeping lean mass while losing (AACE 2025). Goal weight keeps it sensible for larger bodies.
+    // resistance training (Morton 2018). During weight loss, intakes over 1.3 g/kg help keep muscle (Kokura 2024).
+    // Goal weight keeps it sensible for larger bodies.
     var protein = 1.6 * goalKg;
     protein = math.min(protein, 0.4 * calories / 4);
     // Fat: about 30 % of calories, never under 0.6 g/kg of goal weight (hormones, vitamin absorption).
@@ -381,8 +381,8 @@ class Plan {
     // Fibre: 14 g per 1,000 kcal (Dietary Guidelines), at least 25 g. It's the most filling thing to add.
     final fiber = math.max(25.0, 14 * calories / 1000);
 
-    // Steps: a bit above your current average, between 7,000 and 10,000, where the health benefit levels
-    // off (Paluch 2022) and the extra burn is meaningful.
+    // Steps: a bit above your current average, between 7,000 and 10,000. The drop in mortality levels off at
+    // 6,000 to 8,000 a day for adults 60 and over and 8,000 to 10,000 for younger adults (Paluch 2022).
     var steps = 8000.0;
     if (baselineSteps != null && baselineSteps > 0) {
       steps = (((baselineSteps + 1000) / 500).roundToDouble() * 500).clamp(7000.0, 10000.0);
@@ -470,7 +470,7 @@ class Plan {
       out.add(
         const Warning(
           WarningLevel.info,
-          'On a GLP-1 medicine, up to 40 % of weight lost can be muscle. Hitting protein and lifting twice a week matter even more.',
+          'In a large trial of a GLP-1 medicine, more than a third of the weight lost was lean mass, which includes muscle. Hitting protein and lifting twice a week matter even more.',
         ),
       );
     }

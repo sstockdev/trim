@@ -35,11 +35,11 @@ The observed value is clamped to between 1.0 and 2.5 × BMR. The estimate then m
 | Deficit | pace × body weight × 7,700 / 7 per day, where pace is 0.5 %, 0.75 % (default) or 1 % of body weight a week; capped at 25 % of maintenance (30 % for the fastest pace) | 0.5 to 1 %/week keeps most loss as fat with protein and lifting (Garthe 2011, Helms 2014). The cap stops very large deficits for heavier people |
 | Calorie floor | 1,500 kcal (male) / 1,200 kcal (female) | Common minimums without medical supervision |
 | Rounding | Calories to the nearest 10 | |
-| Protein | 1.6 g/kg of goal weight, at most 40 % of calories | Muscle-retention benefit plateaus around 1.6 g/kg (Morton 2018); goal weight keeps it sensible for larger bodies and lands within the 1.2 to 1.6 g/kg of current weight in obesity guidance |
+| Protein | 1.6 g/kg of goal weight, at most 40 % of calories | Muscle gain from resistance training stops increasing above about 1.6 g/kg (Morton 2018); during weight loss, intakes over 1.3 g/kg help keep muscle (Kokura 2024); goal weight keeps it sensible for larger bodies |
 | Fat | max(30 % of calories, 0.6 g/kg goal weight) | Hormones, absorbing fat-soluble vitamins |
 | Carbs | The rest | Split matters far less than calories and protein |
 | Fibre | max(25 g, 14 g per 1,000 kcal) | Dietary Guidelines for Americans; most filling thing to add |
-| Steps | 14-day average + 1,000, rounded to 500, kept within 7,000 to 10,000 (8,000 with no data) | Benefits level off around 7k to 10k (Paluch 2022) |
+| Steps | 14-day average + 1,000, rounded to 500, kept within 7,000 to 10,000 (8,000 with no data) | The drop in mortality levels off at 6,000 to 8,000 steps a day for adults 60 and over and 8,000 to 10,000 for younger adults (Paluch 2022) |
 | Maintenance | No deficit when the trend is within 0.3 kg of goal, during a maintenance break, or when the safety screen says stop | |
 
 The exercise bonus (`AppRepository.calorieTarget`, off by default) adds half of the day's active energy above the 14-day average. It's off because maintenance already includes normal activity and watches overestimate burns.
@@ -54,7 +54,7 @@ An exponential moving average with 10 % smoothing per day (The Hacker's Diet), a
 
 Being under 18, pregnant or breastfeeding, or under a BMI of 18.5 stops the deficit: targets go to maintenance.
 
-The app shows a caution for a goal BMI under 18.5, a history of eating disorders (involve a clinician), diabetes medicines that can cause lows, and kidney disease (ask before high protein). GLP-1 medicines get an info note: in STEP 1's body-composition substudy, about 40 % of the weight lost was lean mass, so protein and lifting matter more.
+The app shows a caution for a goal BMI under 18.5, a history of eating disorders (involve a clinician), diabetes medicines that can cause lows, and kidney disease (ask before high protein). GLP-1 medicines get an info note: in STEP 1's body-composition substudy, more than a third of the weight lost was lean mass (15.0 % of body weight lost, 9.7 % of a lean mass that made up about 54 % of the body), so protein and lifting matter more.
 
 Trend alerts fire when the trend drops more than 1.5 % a week over two weeks (after the first 3 weeks), or when intake averages more than 100 kcal under the floor over 4 or more counted days.
 
@@ -67,7 +67,7 @@ Comments, in order: fewer than 5 logged days; losing faster than 1.5 %/week, slo
 - Mifflin et al., Am J Clin Nutr 1990; Frankenfield et al., J Am Diet Assoc 2005 (BMR equations)
 - Hall et al., Lancet 2011 (dynamic energy balance; why "3,500 kcal per pound" overpromises)
 - Garthe et al., IJSNEM 2011; Helms et al., JISSN 2014 (rate of loss and lean mass)
-- Morton et al., Br J Sports Med 2018; Longland et al., Am J Clin Nutr 2016; Jäger et al., ISSN 2017 (protein)
+- Morton et al., Br J Sports Med 2018; Longland et al., Am J Clin Nutr 2016; Jäger et al., J Int Soc Sports Nutr 2017; Kokura et al., Clin Nutr ESPEN 2024 (protein)
 - Dietary Guidelines for Americans 2020 to 2025 (fibre, fat)
 - Physical Activity Guidelines for Americans, 2nd ed., 2018; Paluch et al., Lancet Public Health 2022 (steps)
 - Cava et al., Adv Nutr 2017 (preserving muscle during weight loss)
